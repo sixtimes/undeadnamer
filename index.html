@@ -126,20 +126,16 @@
             td.appendChild(h2);
             td.appendChild(ul);
             document.getElementById('name_chart').getElementsByTagName('tr')[0].appendChild(td);
-            console.log(messages);
             if (messages && messages.length > 0) {
+                let message_array = [];
                 for (var i = 0; i < messages.length; i++) {
                     var message = messages[i];
                     getMessage('me', message.id, function(message) {
                         if(message && message.payload) {
-                            var headers = _.keyBy(message.payload.headers, 'name');
-                            var li = document.createElement('li');
-                            li.appendChild(document.createTextNode('To: ' + headers['To'].value));
-                            li.appendChild(document.createElement('br'));
-                            li.appendChild(document.createTextNode('From: ' + headers['From'].value));
-                            li.appendChild(document.createElement('br'));
-                            li.appendChild(document.createTextNode('Subject: ' + headers['Subject'].value + '\n\n'));
-                            ul.appendChild(li);
+                            message_array.push(_.keyBy(message.payload.headers, 'name'));
+                            if(message_array.length === messages.length) {
+                                constructCell(ul, message_array);
+                            }
                         }
                     });
                 }
@@ -147,32 +143,27 @@
                 td.appendChild(document.createTextNode('No messages found.'))
             }
 
-/*            appendPre('Messages:');
-
-            if (messages && messages.length > 0) {
-                for (i = 0; i < messages.length; i++) {
-                    var message = messages[i];
-                    getMessage('me', message.id, appendPre);
-                }
-            } else {
-                appendPre('No Messages found.');
-            }*/
-
         }
 
-        /**
-         * Append a pre element to the body containing the given message
-         * as its text node.
-         *
-         * @param {string} message Text to be placed in pre element.
-         */
-        function appendPre(message) {
-            if(message && message.payload) {
-                var headers = _.keyBy(message.payload.headers, 'name');
-                console.log(headers)
-                var pre = document.getElementById('output');
-                var textContent = document.createTextNode('To: ' + headers['To'].value + '\n' + 'From: ' + headers['From'].value + '\n' + 'Subject: ' + headers['Subject'].value + '\n\n');
-                pre.appendChild(textContent);
+        function constructCell(ul, message_array) {
+            var domain_count = {};
+            for(var i = 0; i < message_array.length; i++) {
+                var headers = message_array[i];
+                var li = document.createElement('li');
+                console.log(headers);
+                if(headers['Date']) {
+                    li.appendChild(document.createTextNode('Date: ' + headers['Date'].value));
+                    li.appendChild(document.createElement('br'));
+                }
+                if(headers['From']) {
+                    var from_split = headers['From'].value.split('@');
+                    li.appendChild(document.createTextNode('From: ' + from_split[from_split.length - 1].slice(0, -1)));
+                    li.appendChild(document.createElement('br'));
+                }
+                if(headers['Subject']) {
+                    li.appendChild(document.createTextNode('Subject: ' + headers['Subject'].value + '\n\n'));
+                }
+                ul.appendChild(li);
             }
         }
 

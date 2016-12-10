@@ -65,8 +65,13 @@
         function listMessages() {
             var request = gapi.client.gmail.users.messages.list({
                 'userId': 'me',
-                'q' : '"opt-out" OR unsubscribe OR "viewing the newsletter" OR "privacy policy" OR enews OR "edit your preferences" OR "email notifications" OR "update profile" OR smartunsubscribe OR secureunsubscribe OR yahoogroups OR "manage your account" OR "group-digests"'
+                'q' : formatQuery()
             });
+            document.getElementById("update").setAttribute("style", "visibility:visible");
+            var pre = document.getElementById('output');
+            while (pre.firstChild) {
+                pre.removeChild(pre.firstChild);
+            }
 
             request.execute(function(resp) {
                 var messages = resp.messages;
@@ -123,7 +128,6 @@
         function appendPre(message) {
             if(message && message.payload) {
                 var headers = _.keyBy(message.payload.headers, 'name');
-                console.log(headers)
                 var pre = document.getElementById('output');
                 var textContent = document.createTextNode(headers.From.value + '\n' + headers.Subject.value + '\n\n');
                 pre.appendChild(textContent);
@@ -136,8 +140,9 @@
 </head>
 <body>
     <div>
+        <p>Type in names to search for: </p>
         <textarea id="searchbox"></textarea>
-        <button onclick = "formatQuery()"></button>
+        <button id="update" style="visibility:hidden" onclick="listMessages()">Update Names</button>
     </div>
 <div id="authorize-div" style="display: none">
     <span>Authorize access to Gmail API</span>

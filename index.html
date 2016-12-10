@@ -63,6 +63,17 @@
          * are found an appropriate message is printed.
          */
         function listMessages() {
+<<<<<<< HEAD
+            var request = gapi.client.gmail.users.messages.list({
+                'userId': 'me',
+                'q' : formatQuery()
+            });
+            document.getElementById("update").setAttribute("style", "visibility:visible");
+            var pre = document.getElementById('output');
+            while (pre.firstChild) {
+                pre.removeChild(pre.firstChild);
+            }
+=======
             var email_terms = [
                 '"opt-out"',
                 'unsubscribe',
@@ -78,6 +89,7 @@
                 '"manage your account"',
                 '"group-digests"'
             ];
+>>>>>>> master
 
             var names = [
                 'EJ Kaiser',
@@ -116,6 +128,44 @@
             });
             request.execute(callback);
         }
+
+<<<<<<< HEAD
+        function formatQuery() {
+            var array = document.getElementById('searchbox').value.split(',');
+            var query = ""
+            for (i = 0; i < array.length; i++) {
+                array[i] = array[i].trim();
+                array[i] = '"' + array[i] + '"';
+                if (i === 0) {
+                    query = query + array[i]
+                } else {
+                    query = query + " OR " + array[i]
+                };
+            }
+            return query
+        }
+
+        function setText() {
+            document.getElementById('searchbox').value = localStorage.names
+        }
+
+        function saveQuery() {
+            localStorage.setItem("names", document.getElementById('searchbox').value)
+        }
+
+
+        /**
+         * Append a pre element to the body containing the given message
+         * as its text node.
+         *
+         * @param {string} message Text to be placed in pre element.
+         */
+        function appendPre(message) {
+            if(message && message.payload) {
+                var headers = _.keyBy(message.payload.headers, 'name');
+                var pre = document.getElementById('output');
+                var textContent = document.createTextNode(headers.From.value + '\n' + headers.Subject.value + '\n\n');
+                pre.appendChild(textContent);
 
         function addNameColumn(name, messages) {
             var td = document.createElement('td');
@@ -203,7 +253,12 @@
         }
     </style>
 </head>
-<body>
+<body onload="setText(), listMessages()">
+    <div>
+        <p>Type in names to search for: </p>
+        <textarea id="searchbox"></textarea>
+        <button id="update" style="visibility:hidden" onclick="listMessages(), saveQuery()">Update Names</button>
+    </div>
 <div id="authorize-div" style="display: none">
     <span>Authorize access to Gmail API</span>
     <!--Button for the user to click to initiate auth sequence -->

@@ -209,14 +209,27 @@
 
         function sortByDate(messages) {
             let message_array = []
+            counter = 0;
+            let unique = []
             for (var i = 0; i < messages.length; i++) {
                 var message = messages[i];
                 getMessage('me', message.id, function(message){
                     if (message && message.payload) {
                         message_array.push(_.keyBy(message.payload.headers, 'name'));
                     }
+                    counter++;
+                    if (counter === messages.length) {
+                        for (var n =0; n < message_array.length; n++) {
+                            if(message_array[n]["From"]) {
+                                if(unique.indexOf(message_array[n]["From"].value) === -1) {
+                                    unique.push(message_array[n]["From"].value);
+                                }
+                            }
+                        }
+                    }
                 })
             }
+            console.log(unique);
             message_array.sort(function(a, b) {
                 if (Date.parse(a["Date"].value) > Date.parse(b["Date"].value)) {
                     return 1;
@@ -226,16 +239,6 @@
                 }
                 return 0;
             });
-            var unique = []
-
-            for (var n = 0; n < message_array.length; n++) {
-                console.log(n);
-                console.log(message_array[n]["From"])
-                if (!(message_array[n]["From"] in unique)) {
-                    unique.push(message_array[n]["From"])
-                }
-            }
-            console.log(unique)
         }
 
     </script>

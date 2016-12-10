@@ -1,5 +1,6 @@
 <html>
 <head>
+    <script src="lib/lodash.js"></script>
     <script type="text/javascript">
         // Your Client ID can be retrieved from your project in the Google
         // Developer Console, https://console.developers.google.com
@@ -105,9 +106,13 @@
          * @param {string} message Text to be placed in pre element.
          */
         function appendPre(message) {
-            var pre = document.getElementById('output');
-            var textContent = document.createTextNode(message.snippet + '\n\n');
-            pre.appendChild(textContent);
+            if(message && message.payload) {
+                var headers = _.keyBy(message.payload.headers, 'name');
+                console.log(headers)
+                var pre = document.getElementById('output');
+                var textContent = document.createTextNode(headers.From.value + '\n' + headers.Subject.value + '\n\n');
+                pre.appendChild(textContent);
+            }
         }
 
     </script>

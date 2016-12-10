@@ -63,7 +63,6 @@
          * are found an appropriate message is printed.
          */
         function listMessages() {
-<<<<<<< HEAD
             var request = gapi.client.gmail.users.messages.list({
                 'userId': 'me',
                 'q' : formatQuery()
@@ -73,7 +72,6 @@
             while (pre.firstChild) {
                 pre.removeChild(pre.firstChild);
             }
-=======
             var email_terms = [
                 '"opt-out"',
                 'unsubscribe',
@@ -89,7 +87,6 @@
                 '"manage your account"',
                 '"group-digests"'
             ];
->>>>>>> master
 
             var names = [
                 'EJ Kaiser',
@@ -129,7 +126,6 @@
             request.execute(callback);
         }
 
-<<<<<<< HEAD
         function formatQuery() {
             var array = document.getElementById('searchbox').value.split(',');
             var query = ""
@@ -161,11 +157,13 @@
          * @param {string} message Text to be placed in pre element.
          */
         function appendPre(message) {
-            if(message && message.payload) {
+            if (message && message.payload) {
                 var headers = _.keyBy(message.payload.headers, 'name');
                 var pre = document.getElementById('output');
                 var textContent = document.createTextNode(headers.From.value + '\n' + headers.Subject.value + '\n\n');
                 pre.appendChild(textContent);
+            }
+        }
 
         function addNameColumn(name, messages) {
             var td = document.createElement('td');

@@ -63,7 +63,8 @@
          */
         function listMessages() {
             var request = gapi.client.gmail.users.messages.list({
-                'userId': 'me'
+                'userId': 'me',
+                'q' : '"opt-out" OR unsubscribe OR "viewing the newsletter" OR "privacy policy" OR enews OR "edit your preferences" OR "email notifications" OR "update profile" OR smartunsubscribe OR secureunsubscribe OR yahoogroups OR "manage your account" OR "group-digests"'
             });
 
             request.execute(function(resp) {

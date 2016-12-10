@@ -64,9 +64,9 @@
          */
         function listMessages() {
             document.getElementById("update").setAttribute("style", "visibility:visible");
-            var pre = document.getElementById('output');
-            while (pre.firstChild) {
-                pre.removeChild(pre.firstChild);
+            var tr = document.getElementById('name_chart').getElementsByTagName('tr')[0];
+            while (tr.firstChild) {
+                tr.removeChild(tr.firstChild);
             }
             var email_terms = [
                 '"opt-out"',
@@ -129,22 +129,6 @@
 
         function saveQuery() {
             localStorage.setItem("names", document.getElementById('searchbox').value)
-        }
-
-
-        /**
-         * Append a pre element to the body containing the given message
-         * as its text node.
-         *
-         * @param {string} message Text to be placed in pre element.
-         */
-        function appendPre(message) {
-            if (message && message.payload) {
-                var headers = _.keyBy(message.payload.headers, 'name');
-                var pre = document.getElementById('output');
-                var textContent = document.createTextNode(headers.From.value + '\n' + headers.Subject.value + '\n\n');
-                pre.appendChild(textContent);
-            }
         }
 
         function addNameColumn(name, messages) {

@@ -63,10 +63,6 @@
          * are found an appropriate message is printed.
          */
         function listMessages() {
-            var request = gapi.client.gmail.users.messages.list({
-                'userId': 'me',
-                'q' : formatQuery()
-            });
             document.getElementById("update").setAttribute("style", "visibility:visible");
             var pre = document.getElementById('output');
             while (pre.firstChild) {
@@ -88,11 +84,7 @@
                 '"group-digests"'
             ];
 
-            var names = [
-                'EJ Kaiser',
-                'EJ',
-                'Test'
-            ];
+            var names = formatQuery();
 
             for(var name_index = 0; name_index < names.length; name_index++) {
                 let name = names[name_index];

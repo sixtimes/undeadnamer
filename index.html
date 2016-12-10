@@ -50,35 +50,53 @@
         }
 
         /**
-         * Load Gmail API client library. List labels once client library
+         * Load Gmail API client library. List messages once client library
          * is loaded.
          */
         function loadGmailApi() {
-            gapi.client.load('gmail', 'v1', listLabels);
+            gapi.client.load('gmail', 'v1', listMessages);
         }
 
         /**
-         * Print all Labels in the authorized user's inbox. If no labels
+         * Print all Messages in the authorized user's inbox. If no messages
          * are found an appropriate message is printed.
          */
-        function listLabels() {
-            var request = gapi.client.gmail.users.labels.list({
+        function listMessages() {
+            var request = gapi.client.gmail.users.messages.list({
                 'userId': 'me'
             });
 
             request.execute(function(resp) {
-                var labels = resp.labels;
-                appendPre('Labels:');
+                var messages = resp.messages;
+                appendPre('Messages:');
 
-                if (labels && labels.length > 0) {
-                    for (i = 0; i < labels.length; i++) {
-                        var label = labels[i];
-                        appendPre(label.name)
+                if (messages && messages.length > 0) {
+                    for (i = 0; i < messages.length; i++) {
+                        var message = messages[i];
+                        getMessage('me', message.id, appendPre);
+                        console.log(message);
+//                        appendPre(message.threadId)
                     }
                 } else {
-                    appendPre('No Labels found.');
+                    appendPre('No Messages found.');
                 }
             });
+        }
+
+        /**
+         * Get Message with given ID.
+         *
+         * @param  {String} userId User's email address. The special value 'me'
+         * can be used to indicate the authenticated user.
+         * @param  {String} messageId ID of Message to get.
+         * @param  {Function} callback Function to call when the request is complete.
+         */
+        function getMessage(userId, messageId, callback) {
+            var request = gapi.client.gmail.users.messages.get({
+                'userId': userId,
+                'id': messageId
+            });
+            request.execute(callback);
         }
 
         /**
@@ -88,6 +106,7 @@
          * @param {string} message Text to be placed in pre element.
          */
         function appendPre(message) {
+            console.log(message)
             var pre = document.getElementById('output');
             var textContent = document.createTextNode(message + '\n');
             pre.appendChild(textContent);

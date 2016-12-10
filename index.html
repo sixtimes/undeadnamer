@@ -64,9 +64,9 @@
          */
         function listMessages() {
             document.getElementById("update").setAttribute("style", "visibility:visible");
-            var tr = document.getElementById('name_chart').getElementsByTagName('tr')[0];
-            while (tr.firstChild) {
-                tr.removeChild(tr.firstChild);
+            var table = document.getElementById('name_chart');
+            while (table.firstChild) {
+                table.removeChild(table.firstChild);
             }
             var email_terms = [
                 '"opt-out"',
@@ -84,12 +84,15 @@
                 '"group-digests"'
             ];
 
-            var names = formatQuery();
+            var names = formatQuery().sort();
+            for(i = 0; i < names.length; i++) {
+                names[i] = names[i].trim();
+            }
             let domain_counts = {};
+            let processed_name_count = 0;
             for(var name_index = 0; name_index < names.length; name_index++) {
                 if(gapi.client.gmail) {
                     let name = names[name_index];
-
                     var request = gapi.client.gmail.users.messages.list({
                         'userId': 'me',
                         'q' : '(' + email_terms.join(' OR ') + ') AND ' + name
@@ -97,10 +100,59 @@
 
                     (request.execute(function(resp) {
                         var messages = resp.messages;
-                        addNameColumn(name, messages);
+//                        addNameColumn(name, messages);
+                        if(messages) {
+                            buildMessageArray(messages, function(message_array) {
+                                var domain_frequency = getDomainFrequency(message_array);
+                                var keys = Object.keys(domain_frequency).sort();
+                                for(var i = 0; i < keys.length; i++) {
+                                    var domain = keys[i];
+                                    if(!domain_counts[domain]) {
+                                        domain_counts[domain] = {};
+                                    }
+                                    domain_counts[domain][name] = domain_frequency[domain];
+                                }
+                                processed_name_count++;
+                                if(processed_name_count === names.length) {
+                                    buildFrequencyTable(names, domain_counts, document.getElementById('name_chart'));
+                                }
+                            })
+                        } else {
+                            processed_name_count++;
+                        }
                     } ));
                 }
             }
+        }
+
+        function buildFrequencyTable(names, domain_frequency, table) {
+            var thead = document.createElement('thead');
+            var tbody = document.createElement('tbody');
+            var header_tr = document.createElement('tr');
+            header_tr.appendChild(document.createElement('th'));
+            for(var i = 0; i < names.length; i++) {
+                var th = document.createElement('th');
+                th.appendChild(document.createTextNode(names[i]));
+                header_tr.appendChild(th);
+            }
+            thead.appendChild(header_tr);
+            table.appendChild(thead);
+            var keys = Object.keys(domain_frequency).sort();
+            for(var i = 0; i < keys.length; i++) {
+                var domain = keys[i];
+                var body_tr = document.createElement('tr');
+                var domain_td = document.createElement('td');
+                domain_td.appendChild(document.createTextNode(domain));
+                body_tr.appendChild(domain_td);
+                for(var j = 0; j < names.length; j++) {
+                    var name = names[j];
+                    var td = document.createElement('td');
+                    td.appendChild(document.createTextNode(domain_frequency[domain][name] || 0));
+                    body_tr.appendChild(td);
+                }
+                tbody.appendChild(body_tr);
+            }
+            table.appendChild(tbody);
         }
 
         /**
@@ -209,9 +261,11 @@
     <script src="https://apis.google.com/js/client.js?onload=checkAuth">
     </script>
     <style type="text/css">
-        table td {
-            border: 1px solid #000;
+        table {
             border-collapse:collapse;
+        }
+        table td, table th {
+            border: 1px solid #000;
             padding: 10px;
             vertical-align: top;
         }

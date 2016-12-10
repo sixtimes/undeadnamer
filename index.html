@@ -99,6 +99,11 @@
             request.execute(callback);
         }
 
+        function formatQuery(){
+            var array = document.getElementById('searchbox').value.split(',');
+            console.log(array);
+        }
+
         /**
          * Append a pre element to the body containing the given message
          * as its text node.
@@ -120,6 +125,10 @@
     </script>
 </head>
 <body>
+    <div>
+        <textarea id="searchbox"></textarea>
+        <button onclick = "formatQuery()"></button>
+    </div>
 <div id="authorize-div" style="display: none">
     <span>Authorize access to Gmail API</span>
     <!--Button for the user to click to initiate auth sequence -->

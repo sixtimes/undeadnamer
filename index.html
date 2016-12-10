@@ -74,8 +74,6 @@
                     for (i = 0; i < messages.length; i++) {
                         var message = messages[i];
                         getMessage('me', message.id, appendPre);
-                        console.log(message);
-//                        appendPre(message.threadId)
                     }
                 } else {
                     appendPre('No Messages found.');
@@ -106,9 +104,8 @@
          * @param {string} message Text to be placed in pre element.
          */
         function appendPre(message) {
-            console.log(message)
             var pre = document.getElementById('output');
-            var textContent = document.createTextNode(message + '\n');
+            var textContent = document.createTextNode(message.snippet + '\n\n');
             pre.appendChild(textContent);
         }
 

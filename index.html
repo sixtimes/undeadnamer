@@ -1,6 +1,10 @@
 <html>
 <head>
-    <script src="lib/lodash.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="js/lodash.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
     <script type="text/javascript">
         // Your Client ID can be retrieved from your project in the Google
         // Developer Console, https://console.developers.google.com
@@ -26,15 +30,19 @@
          * @param {Object} authResult Authorization result.
          */
         function handleAuthResult(authResult) {
+            document.getElementById('container').style.background = '#fff';
             var authorizeDiv = document.getElementById('authorize-div');
+            var undeadnamerDiv = document.getElementById('undeadnamer');
             if (authResult && !authResult.error) {
                 // Hide auth UI, then load client library.
                 authorizeDiv.style.display = 'none';
+                undeadnamerDiv.style.display = 'block';
                 loadGmailApi();
             } else {
                 // Show auth UI, allowing the user to initiate authorization by
                 // clicking authorize button.
                 authorizeDiv.style.display = 'inline';
+                undeadnamerDiv.style.display = 'none';
             }
         }
 
@@ -68,6 +76,7 @@
             while (table.firstChild) {
                 table.removeChild(table.firstChild);
             }
+            document.getElementById('container').style.background = "background: url('img/ajax-loader.gif') center center no-repeat";
             var email_terms = [
                 '"opt-out"',
                 'unsubscribe',
@@ -100,7 +109,6 @@
 
                     (request.execute(function(resp) {
                         var messages = resp.messages;
-//                        addNameColumn(name, messages);
                         if(messages) {
                             buildMessageArray(messages, function(message_array) {
                                 var domain_frequency = getDomainFrequency(message_array);
@@ -148,7 +156,7 @@
                     var name = names[j];
                     var td = document.createElement('td');
                     if(domain_frequency[domain][name]) {
-                        td.className = 'active'
+                        td.className = 'success';
                     }
                     td.appendChild(document.createTextNode(domain_frequency[domain][name] || 0));
                     body_tr.appendChild(td);
@@ -156,6 +164,7 @@
                 tbody.appendChild(body_tr);
             }
             table.appendChild(tbody);
+            document.getElementById('container').style.background = "#fff";
         }
 
         /**
@@ -263,39 +272,34 @@
     </script>
     <script src="https://apis.google.com/js/client.js?onload=checkAuth">
     </script>
-    <style type="text/css">
-        table {
-            border-collapse:collapse;
-        }
-        table td, table th {
-            border: 1px solid #000;
-            padding: 10px;
-            vertical-align: top;
-        }
-
-        table td.active {
-            background-color: #cccc99;
-        }
-    </style>
 </head>
-<body onload="setText(), listMessages()">
-    <div>
-        <p>Type in names to search for: </p>
-        <textarea id="searchbox"></textarea>
-        <button id="update" style="visibility:hidden" onclick="listMessages(), saveQuery()">Update Names</button>
+<body onload="setText(), listMessages()" style="background: url('img/ajax-loader.gif') center center no-repeat;" id="body">
+<div class="container" id="container">
+    <div class="text-center">
+        <h1>The Un-deadnamer</h1>
+        <small>Not the Undead-namer.</small>
     </div>
-<div id="authorize-div" style="display: none">
-    <span>Authorize access to Gmail API</span>
-    <!--Button for the user to click to initiate auth sequence -->
-    <button id="authorize-button" onclick="handleAuthClick(event)">
-        Authorize
-    </button>
-</div>
-<table id="name_chart">
-    <tr>
+    <div id="undeadnamer" style="display: none;">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="searchbox">Type in names to search for: </label>
+                <input id="searchbox" class="form-control"/>
+            </div>
+            <button id="update" style="visibility:hidden" onclick="listMessages(), saveQuery()" class="btn btn-default">Update Names</button>
+        </form>
+    </div>
+    <table id="name_chart" class="table">
+        <tr>
 
-    </tr>
-</table>
-<pre id="output"></pre>
+        </tr>
+    </table>
+    <div id="authorize-div" style="display: none">
+        <label for="authorize-button">Authorize access to Gmail API</label>
+        <!--Button for the user to click to initiate auth sequence -->
+        <button id="authorize-button" onclick="handleAuthClick(event)" class="btn btn-default">
+            Authorize
+        </button>
+    </div>
+</div>
 </body>
 </html>

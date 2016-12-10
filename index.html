@@ -163,13 +163,15 @@
             var domain_count = {};
             for(var i = 0; i < message_array.length; i++) {
                 var headers = message_array[i];
-                var li = document.createElement('li');
-                var from_split = headers['From'].value.split('@');
-                var domain = from_split[from_split.length - 1].replace('>', '');
-                if(domain_count[domain]) {
-                    domain_count[domain]++;
-                } else {
-                    domain_count[domain] = 1;
+                if(headers['From']) {
+                    var li = document.createElement('li');
+                    var from_split = headers['From'].value.split('@');
+                    var domain = from_split[from_split.length - 1].replace('>', '');
+                    if (domain_count[domain]) {
+                        domain_count[domain]++;
+                    } else {
+                        domain_count[domain] = 1;
+                    }
                 }
 /*                if(headers['Date']) {
                     li.appendChild(document.createTextNode('Date: ' + headers['Date'].value));

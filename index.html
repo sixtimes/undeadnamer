@@ -85,20 +85,21 @@
             ];
 
             var names = formatQuery();
-
+            let domain_counts = {};
             for(var name_index = 0; name_index < names.length; name_index++) {
-                let name = names[name_index];
+                if(gapi.client.gmail) {
+                    let name = names[name_index];
 
-                var request = gapi.client.gmail.users.messages.list({
-                    'userId': 'me',
-                    'q' : '(' + email_terms.join(' OR ') + ') AND ' + name
-                });
+                    var request = gapi.client.gmail.users.messages.list({
+                        'userId': 'me',
+                        'q' : '(' + email_terms.join(' OR ') + ') AND ' + name
+                    });
 
-                (request.execute(function(resp) {
-                    var messages = resp.messages;
-                    addNameColumn(name, messages);
-                } ));
-
+                    (request.execute(function(resp) {
+                        var messages = resp.messages;
+                        addNameColumn(name, messages);
+                    } ));
+                }
             }
         }
 
@@ -134,32 +135,37 @@
         function addNameColumn(name, messages) {
             var td = document.createElement('td');
             var h2 = document.createElement('h2');
-            var ul = document.createElement('ul');
             var name_node = document.createTextNode(name);
             h2.appendChild(name_node);
             td.appendChild(h2);
-            td.appendChild(ul);
             document.getElementById('name_chart').getElementsByTagName('tr')[0].appendChild(td);
             if (messages && messages.length > 0) {
-                let message_array = [];
-                for (var i = 0; i < messages.length; i++) {
-                    var message = messages[i];
-                    getMessage('me', message.id, function(message) {
-                        if(message && message.payload) {
-                            message_array.push(_.keyBy(message.payload.headers, 'name'));
-                            if(message_array.length === messages.length) {
-                                constructCell(td, ul, message_array);
-                            }
-                        }
-                    });
-                }
+                buildMessageArray(messages, function(message_array) {
+                    constructCell(td, message_array);
+                })
             } else {
                 td.appendChild(document.createTextNode('No messages found.'))
             }
 
         }
 
-        function constructCell(td, ul, message_array) {
+        function buildMessageArray(messages, callback) {
+            let message_array = [];
+            for (var i = 0; i < messages.length; i++) {
+                var message = messages[i];
+                getMessage('me', message.id, function(message) {
+                    if(message && message.payload) {
+                        message_array.push(_.keyBy(message.payload.headers, 'name'));
+                        if(message_array.length === messages.length) {
+                            callback(message_array);
+                        }
+                    }
+                });
+            }
+
+        }
+
+        function getDomainFrequency(message_array) {
             var domain_count = {};
             for(var i = 0; i < message_array.length; i++) {
                 var headers = message_array[i];
@@ -173,24 +179,16 @@
                         domain_count[domain] = 1;
                     }
                 }
-/*                if(headers['Date']) {
-                    li.appendChild(document.createTextNode('Date: ' + headers['Date'].value));
-                    li.appendChild(document.createElement('br'));
-                }
-                if(headers['From']) {
-                    li.appendChild(document.createTextNode('From: ' + domain));
-                    li.appendChild(document.createElement('br'));
-                }
-                if(headers['Subject']) {
-                    li.appendChild(document.createTextNode('Subject: ' + headers['Subject'].value + '\n\n'));
-                }
-                ul.appendChild(li);*/
             }
-            td.appendChild(domain_table(domain_count));
-            console.log(domain_count);
+            return domain_count;
         }
 
-        function domain_table(domain_count) {
+        function constructCell(td, message_array) {
+            var domain_count = getDomainFrequency(message_array);
+            td.appendChild(getDomainTable(domain_count));
+        }
+
+        function getDomainTable(domain_count) {
             var table = document.createElement('table');
             var keys = Object.keys(domain_count).sort();
             for(var i = 0; i < keys.length; i++) {

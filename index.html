@@ -104,7 +104,7 @@
             request.execute(callback);
         }
 
-        function formatQuery(){
+        function formatQuery() {
             var array = document.getElementById('searchbox').value.split(',');
             var query = ""
             for (i = 0; i < array.length; i++) {
@@ -118,6 +118,15 @@
             }
             return query
         }
+
+        function setText() {
+            document.getElementById('searchbox').value = localStorage.names
+        }
+
+        function saveQuery() {
+            localStorage.setItem("names", document.getElementById('searchbox').value)
+        }
+
 
         /**
          * Append a pre element to the body containing the given message
@@ -138,11 +147,11 @@
     <script src="https://apis.google.com/js/client.js?onload=checkAuth">
     </script>
 </head>
-<body>
+<body onload="setText(), listMessages()">
     <div>
         <p>Type in names to search for: </p>
         <textarea id="searchbox"></textarea>
-        <button id="update" style="visibility:hidden" onclick="listMessages()">Update Names</button>
+        <button id="update" style="visibility:hidden" onclick="listMessages(), saveQuery()">Update Names</button>
     </div>
 <div id="authorize-div" style="display: none">
     <span>Authorize access to Gmail API</span>

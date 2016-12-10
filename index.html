@@ -147,6 +147,9 @@
                 for(var j = 0; j < names.length; j++) {
                     var name = names[j];
                     var td = document.createElement('td');
+                    if(domain_frequency[domain][name]) {
+                        td.className = 'active'
+                    }
                     td.appendChild(document.createTextNode(domain_frequency[domain][name] || 0));
                     body_tr.appendChild(td);
                 }
@@ -268,6 +271,10 @@
             border: 1px solid #000;
             padding: 10px;
             vertical-align: top;
+        }
+
+        table td.active {
+            background-color: #cccc99;
         }
     </style>
 </head>

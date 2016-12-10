@@ -63,24 +63,42 @@
          * are found an appropriate message is printed.
          */
         function listMessages() {
-            var request = gapi.client.gmail.users.messages.list({
-                'userId': 'me',
-                'q' : '"opt-out" OR unsubscribe OR "viewing the newsletter" OR "privacy policy" OR enews OR "edit your preferences" OR "email notifications" OR "update profile" OR smartunsubscribe OR secureunsubscribe OR yahoogroups OR "manage your account" OR "group-digests"'
-            });
+            var email_terms = [
+                '"opt-out"',
+                'unsubscribe',
+                '"viewing the newsletter"',
+                '"privacy policy"',
+                'enews',
+                '"edit your preferences"',
+                '"email notifications"',
+                '"update profile"',
+                'smartunsubscribe',
+                'secureunsubscribe',
+                'yahoogroups',
+                '"manage your account"',
+                '"group-digests"'
+            ];
 
-            request.execute(function(resp) {
-                var messages = resp.messages;
-                appendPre('Messages:');
+            var names = [
+                'EJ Kaiser',
+                'EJ',
+                'Test'
+            ];
 
-                if (messages && messages.length > 0) {
-                    for (i = 0; i < messages.length; i++) {
-                        var message = messages[i];
-                        getMessage('me', message.id, appendPre);
-                    }
-                } else {
-                    appendPre('No Messages found.');
-                }
-            });
+            for(var name_index = 0; name_index < names.length; name_index++) {
+                let name = names[name_index];
+
+                var request = gapi.client.gmail.users.messages.list({
+                    'userId': 'me',
+                    'q' : '(' + email_terms.join(' OR ') + ') AND ' + name
+                });
+
+                (request.execute(function(resp) {
+                    var messages = resp.messages;
+                    addNameColumn(name, messages);
+                } ));
+
+            }
         }
 
         /**
@@ -99,6 +117,49 @@
             request.execute(callback);
         }
 
+        function addNameColumn(name, messages) {
+            var td = document.createElement('td');
+            var h2 = document.createElement('h2');
+            var ul = document.createElement('ul');
+            var name_node = document.createTextNode(name);
+            h2.appendChild(name_node);
+            td.appendChild(h2);
+            td.appendChild(ul);
+            document.getElementById('name_chart').getElementsByTagName('tr')[0].appendChild(td);
+            console.log(messages);
+            if (messages && messages.length > 0) {
+                for (var i = 0; i < messages.length; i++) {
+                    var message = messages[i];
+                    getMessage('me', message.id, function(message) {
+                        if(message && message.payload) {
+                            var headers = _.keyBy(message.payload.headers, 'name');
+                            var li = document.createElement('li');
+                            li.appendChild(document.createTextNode('To: ' + headers['To'].value));
+                            li.appendChild(document.createElement('br'));
+                            li.appendChild(document.createTextNode('From: ' + headers['From'].value));
+                            li.appendChild(document.createElement('br'));
+                            li.appendChild(document.createTextNode('Subject: ' + headers['Subject'].value + '\n\n'));
+                            ul.appendChild(li);
+                        }
+                    });
+                }
+            } else {
+                td.appendChild(document.createTextNode('No messages found.'))
+            }
+
+/*            appendPre('Messages:');
+
+            if (messages && messages.length > 0) {
+                for (i = 0; i < messages.length; i++) {
+                    var message = messages[i];
+                    getMessage('me', message.id, appendPre);
+                }
+            } else {
+                appendPre('No Messages found.');
+            }*/
+
+        }
+
         /**
          * Append a pre element to the body containing the given message
          * as its text node.
@@ -110,7 +171,7 @@
                 var headers = _.keyBy(message.payload.headers, 'name');
                 console.log(headers)
                 var pre = document.getElementById('output');
-                var textContent = document.createTextNode(headers.From.value + '\n' + headers.Subject.value + '\n\n');
+                var textContent = document.createTextNode('To: ' + headers['To'].value + '\n' + 'From: ' + headers['From'].value + '\n' + 'Subject: ' + headers['Subject'].value + '\n\n');
                 pre.appendChild(textContent);
             }
         }
@@ -118,6 +179,14 @@
     </script>
     <script src="https://apis.google.com/js/client.js?onload=checkAuth">
     </script>
+    <style type="text/css">
+        table td {
+            border: 1px solid #000;
+            border-collapse:collapse;
+            padding: 10px;
+            vertical-align: top;
+        }
+    </style>
 </head>
 <body>
 <div id="authorize-div" style="display: none">
@@ -127,6 +196,11 @@
         Authorize
     </button>
 </div>
+<table id="name_chart">
+    <tr>
+
+    </tr>
+</table>
 <pre id="output"></pre>
 </body>
 </html>

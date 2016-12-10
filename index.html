@@ -96,6 +96,7 @@
 
                 (request.execute(function(resp) {
                     var messages = resp.messages;
+                    sortByDate(messages);
                     addNameColumn(name, messages);
                 } ));
 
@@ -187,7 +188,6 @@
                 ul.appendChild(li);*/
             }
             td.appendChild(domain_table(domain_count));
-            console.log(domain_count);
         }
 
         function domain_table(domain_count) {
@@ -205,6 +205,37 @@
                 table.appendChild(tr);
             }
             return table;
+        }
+
+        function sortByDate(messages) {
+            let message_array = []
+            for (var i = 0; i < messages.length; i++) {
+                var message = messages[i];
+                getMessage('me', message.id, function(message){
+                    if (message && message.payload) {
+                        message_array.push(_.keyBy(message.payload.headers, 'name'));
+                    }
+                })
+            }
+            message_array.sort(function(a, b) {
+                if (Date.parse(a["Date"].value) > Date.parse(b["Date"].value)) {
+                    return 1;
+                }
+                if (Date.parse(a["Date"].value) < Date.parse(b["Date"].value)) {
+                    return -1;
+                }
+                return 0;
+            });
+            var unique = []
+
+            for (var n = 0; n < message_array.length; n++) {
+                console.log(n);
+                console.log(message_array[n]["From"])
+                if (!(message_array[n]["From"] in unique)) {
+                    unique.push(message_array[n]["From"])
+                }
+            }
+            console.log(unique)
         }
 
     </script>
